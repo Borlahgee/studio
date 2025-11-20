@@ -105,6 +105,11 @@ export default function TimetablePage() {
        setTasks({ ...rest, [id]: taskRest });
        return;
     }
+    
+    if (isNaN(datetime.getTime())) {
+        console.error("Invalid date provided to setDateTime for task ID:", id);
+        return;
+    }
 
     setTasks((prev) => ({
       ...prev,
@@ -271,6 +276,16 @@ const TaskItem = ({ item, onToggleDone, onSetDateTime }: TaskItemProps) => {
   const [time, setTime] = useState<string>(item.datetime ? new Date(item.datetime).toTimeString().substring(0, 5) : "09:00");
 
   useEffect(() => {
+    if (item.datetime) {
+      const d = new Date(item.datetime);
+      if (!isNaN(d.getTime())) {
+        setDate(d);
+        setTime(d.toTimeString().substring(0, 5));
+      }
+    }
+  }, [item.datetime]);
+
+  useEffect(() => {
     if (!date) {
       onSetDateTime(undefined);
       return;
@@ -279,6 +294,7 @@ const TaskItem = ({ item, onToggleDone, onSetDateTime }: TaskItemProps) => {
     const newDateTime = new Date(date);
     newDateTime.setHours(hours, minutes, 0, 0);
     onSetDateTime(newDateTime);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [date, time]);
 
   return (
